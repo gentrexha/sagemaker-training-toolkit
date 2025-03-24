@@ -15,6 +15,7 @@ from __future__ import absolute_import
 from glob import glob
 import os
 import sys
+import platform
 
 import setuptools
 
@@ -50,11 +51,17 @@ required_packages = [
 if sys.version_info < (3, 4):
     required_packages.append("enum34 >= 1.1.6")
 
+# Use platform-specific compile flags
+if platform.system() == "Darwin":  # macOS
+   extra_compile_args = ["-Wall", "-shared"]
+else:  # Linux and other systems
+   extra_compile_args = ["-Wall", "-shared", "-export-dynamic", "-ldl"]
+
 gethostname = setuptools.Extension(
     "gethostname",
     sources=["src/sagemaker_training/c/gethostname.c", "src/sagemaker_training/c/jsmn.c"],
     include_dirs=["src/sagemaker_training/c"],
-    extra_compile_args=["-Wall", "-shared", "-export-dynamic", "-ldl"],
+    extra_compile_args=extra_compile_args,
 )
 
 setuptools.setup(
